@@ -30,7 +30,31 @@ scenarios = [
         'expected_volume': 0
     },
     {
+        'walls': [1, 2],
+        'expected_volume': 0
+    },
+    {
+        'walls': [-2, -1],
+        'expected_volume': 0
+    },
+    {
+        'walls': [2, 1],
+        'expected_volume': 0
+    },
+    {
+        'walls': [-1, -2],
+        'expected_volume': 0
+    },
+    {
         'walls': [-3, -2, -1],
+        'expected_volume': 0
+    },
+    {
+        'walls': [1, 2, 3],
+        'expected_volume': 0
+    },
+    {
+        'walls': [-1, -2, -3],
         'expected_volume': 0
     },
     {
