@@ -1,12 +1,9 @@
 #!/usr/bin/python
 # A solution for this puzzle:
 # * http://programmingpraxis.com/2013/11/15/twitter-puddle/
+import logging
 
 
-# *   
-# **  
-# *** *
-# *****
 def compute_volume(walls):
     """Compute the volume of all puddles formed by the walls.
 
@@ -20,83 +17,81 @@ def compute_volume(walls):
     walls_length = len(walls)
 
     start_peak = walls[0]
-    end_peak = None
-    lowest_peak = None
-
-    depths = []
+    air_depths = []
+    water_depths = []
     volumes = []
-    air_volumes = []
-
-    volume = 0
     total_volume = 0
 
     for i in range(1, len(walls)):
 
-        if len(depths) == 0:
+        # No new puddle
+        if len(water_depths) == 0:
+            # New peak is found because this wall is as high as the start peak
             if walls[i] >= start_peak:
                 start_peak = walls[i]
             else:
-                depths.append(walls[i])
-                lowest_valley = walls[i]
-                air_volumes.append(start_peak - walls[i])
+                water_depths.append(walls[i])
+                base = walls[i]
+                air_depths.append(walls[i])
         else:
+            # New peak is found because this wall is as high as the start peak,
+            # air depths become water depths in this case
             if walls[i] >= start_peak:
-                end_peak = walls[i]
                 lowest_peak = start_peak
 
                 # Compute
-                volume = sum([lowest_peak - depth for depth in depths])
-                volumes.append(volume)
+                water_volume = sum([lowest_peak - ad for ad in air_depths])
+                total_volume += water_volume
 
+                # Reset
+                volumes = []
                 start_peak = walls[i]
-                end_peak = None
-                lowest_peak = None
-                depths = []
+                water_depths = []
+                air_depths = []
             else:
-                if walls[i] <= lowest_valley:
-                    depths.append(walls[i])
-                    lowest_valley = walls[i]
-                    air_volumes.append(start_peak - walls[i])
+                # Goes deeper
+                if walls[i] <= base:
+                    base = walls[i]
+                    water_depths.append(walls[i])
+                    air_depths.append(walls[i])
                 else:
+                    # This is the last wall
                     if i + 1 == walls_length:
-                        end_peak = walls[i]
-                        lowest_peak = end_peak
-                        # compute
-                        # reset
+                        lowest_peak = walls[i]
+
+                        # Compute
+                        lower_depths = [
+                            wd for wd in water_depths if wd < lowest_peak]
+                        volume = sum(
+                            [lowest_peak - ld for ld in lower_depths])
+                        volumes.append(volume)
+
+                        # Reset
+                        water_depths = []
+                        air_depths.append(walls[i])
                     else:
+                        # New peak is found because the next wall is deeper
                         if walls[i + 1] <= walls[i]:
-                            end_peak = walls[i]# end peak is found
-                            lowest_peak = end_peak
-                            # compute
-                            # reset
+                            lowest_peak = walls[i]
+
+                            # Compute
+                            lower_depths = [
+                                wd for wd in water_depths if wd < lowest_peak]
+                            volume = sum(
+                                [lowest_peak - ld for ld in lower_depths])
+                            volumes.append(volume)
+
+                            # Reset
+                            water_depths = []
+                            air_depths.append(walls[i])
                         else:
-                            depths.append(walls[i])
-                            air_volumes.append(start_peak - walls[i])
+                            water_depths.append(walls[i])
+                            air_depths.append(walls[i])
 
+        logging.info(
+            "water_depths=%s air_depths=%s volumes=%s total_volume=%s" % (
+                water_depths, air_depths, volumes, total_volume))
 
-
-
-        # # The next peak is found, add up all the depths
-        # # to compute the volume so far and save it.
-        # if walls[i] > walls[i - 1]:
-        #
-        #     # Figure out the lowest peak
-        #     if walls[i] >=
-        #     next_peak = walls[i]
-        #     lowest_peak = next_peak if next_peak < peak else peak
-        #
-        #     print 'peak', peak, 'next_peak', next_peak, 'lowest_peak', lowest_peak, depths
-        #     # Calculate the volume
-        #     volume = sum([lowest_peak - depth for depth in depths])
-        #     volumes.append(volume)
-        #
-        #     # Reset
-        #     depths = []
-        #     peak = next_peak
-        #
-        # else:
-        #     # A peak was found, save the current wall.
-        #     depths.append(walls[i])
-
-    # Add up all the volumes to return the total volume.
-    return sum(volumes)
+    # Add up all the volumes to the total volume
+    total_volume += sum(volumes)
+    return total_volume
