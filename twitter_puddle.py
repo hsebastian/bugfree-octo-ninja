@@ -1,6 +1,9 @@
 #!/usr/bin/python
+#
 # A solution for this puzzle:
-# * http://programmingpraxis.com/2013/11/15/twitter-puddle/
+#     http://programmingpraxis.com/2013/11/15/twitter-puddle/
+#
+# version: 1.0
 import logging
 
 
